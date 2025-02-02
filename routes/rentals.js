@@ -9,14 +9,14 @@ const router = express.Router();
 
 Fawn.init(mongoose);
 
-router.get("/", auth, async (req, res) => {
+router.route("/")
+      .get(auth, async (req, res) => {
   const rentals = await Rental.find()
     .select("-__v")
     .sort("-dateOut");
   res.send(rentals);
-});
-
-router.post("/", auth, async (req, res) => {
+})
+      .post(auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -44,15 +44,15 @@ router.post("/", auth, async (req, res) => {
 
   try {
     new Fawn.Task()
-      .save("rentals", rental)
-      .update(
-        "movies",
-        { _id: movie._id },
-        {
-          $inc: { numberInStock: -1 }
-        }
-      )
-      .run();
+        .save("rentals", rental)
+        .update(
+            "movies",
+            { _id: movie._id },
+            {
+              $inc: { numberInStock: -1 }
+            }
+        )
+        .run();
 
     res.send(rental);
   } catch (ex) {
@@ -60,7 +60,8 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-router.get("/:id", [auth], async (req, res) => {
+router.route("/:id")
+      .get([auth], async (req, res) => {
   const rental = await Rental.findById(req.params.id).select("-__v");
 
   if (!rental)
